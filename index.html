@@ -1,0 +1,27 @@
+  // Send user input to AI model and get response
+  axios.get('https://api.venice.so/ask?userText=' + encodeURIComponent(userText))
+    .then(response => {
+      // Display bot response
+      let reply = document.createElement("div");
+      reply.innerHTML = "<strong>" + response.data.botText + "</strong>";
+      document.getElementById("chatbox").innerHTML = reply.outerHTML + document.getElementById("chatbox").innerHTML;
+      
+      // Clear user input
+      document.getElementById("userInput").value = "";
+      // Scroll to bottom of chatbox after new message
+      document.querySelector('#root').scrollTop = document.querySelector('#root').scrollHeight;
+    })
+    .catch(error => {
+      alert("Error communicating with AI: " + error);
+    });
+}
+
+// Start the chatbot
+window.onload = function() {
+  // Send initial greeting message to get conversation started
+  setInterval(() => {
+    let newMessage = document.createElement("div");
+    newMessage.innerHTML = "<strong>Hi there! How can I assist you today?</strong>";
+    document.getElementById("chatbox").insertBefore(newMessage, document.getElementById("chatbox").firstChild), 0);
+  }, 1);
+}
