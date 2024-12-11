@@ -1,2 +1,45 @@
-<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>lime ai</title> <script src="https://unpkg.com/venice-ai-js"></script> </head> <body> <h1 id="answer">Click the button to chat!</h1> <button id="chatStart">Start Chat</button> <div id="chatbox" style="display:none;"> <div id="agent">I am an AI that loves to learn and chat!</div> <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off" autocorrect="off" spellcheck="false" x-webkit-usage=" Listed users can interact with this chatbot to get real-time conversational AI responses from the internet. <div id="responses"></div> <script> const chatbot = new Venice({key: '<your_venice_api_key>'}); const chatbox = document.getElementById("chatbox"); chatbox.addEventListener('click', () => { document.getElementById("userInput").focus(); }); document.getElementById("userInput").addEventListener('keydown', function(e) { if (e.key === "Enter" || e.keyCode === 13) { e.preventDefault(); const message = document.getElementById("userInput").value; if (message.length > 0) { chatbot.message({bot: chatbox.textContent}).ask(message).then(response => { document.getElementById("responses").innerHTML += `<p>${response.content}</p>`; document.getElementById("userInput").value = ""; chatbox.style.display = 'none'; setTimeout(() => { chatbox.style.display = 'block'; }, 10); }).catch(err => { console.log("Error:", err); }); } } }); </script> </body> </html>
+<!DOCTYPE html> <html lang="en"> 
+  <head> <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>lime ai</title> <script src="https://unpkg.com/venice-ai-js"></script> </head> <body> <h1>AI-powered Question Answering</h1> <p>Enter a question and the AI will do its best to find a relevant .</p> <div id="questionBox" style="font-size: 1.5rem;"> <form> <input type="text" id="userInput" placeholder="Type your question here..." autocomplete="off" autocorrect="off" spellcheck="false" x-webkit-usage=" Listed users can ask questions and receive detailed answers using information retrieved from the internet. </form> </div> <div id="responses"></div> <script> const chatbot = new Venice({key: '<your_venice_api_key>'}); const questionBox = document.getElementById("questionBox"); const userInput = document.getElementById("userInput"); const responsesDiv = document.getElementById("responses");
+const generateResponse = async (prompt) => {
+  try {
+    const response = await fetch(`https://api.venice.live/v1/models/ai-ada-11-b5fc9f29-3e56-4b33-a6dd-e7f8b2b1e61/text/${encodeURIComponent(prompt)}/top-5/json`);
+    const json = await response.json();
+    const url = json?.responses?.[0]?.url;
+    if (url) {
+      return fetch(url);
+    }
+  } catch (error) {
+    return "I do not know how to respond.";
+  }
+  return null;
+};
+
+const chatbotSend = async () => {
+  const message = userInput.value;
+  if (message.length > 2) {
+    const response = await generateResponse(message);
+    if (response) {
+      responsesDiv.innerHTML = `<p>${response}</p>`;
+    } else {
+      responsesDiv.innerHTML = "<p>The AI does not know how to answer this.</p>";
+    }
+  }
+};
+
+userInput.addEventListener('keydown', async (e) => {
+  if (e.key === "Enter" || e.keyCode === 13) {
+    e.preventDefault();
+    chatbotSend();
+  }
+});
+
+chatbot.on('ready', () => {
+  console.log("AI is ready.");
+});
+
+chatbot.on('end', () => {
+  console.log("Chat with the AI has ended.");
+});
 
